@@ -1,0 +1,571 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Django user account login by email (no usernames) | GriceBlog</title><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="Django user account login by email (no usernames)" /><meta name="author" content="Galen Rice" /><meta property="og:locale" content="en_US" /><meta name="description" content="A common gripe with the Django framework is how it handles user accounts. Or, rather, how difficult it is to change from its default User model to something else." /><meta property="og:description" content="A common gripe with the Django framework is how it handles user accounts. Or, rather, how difficult it is to change from its default User model to something else." /><link rel="canonical" href="https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" /><meta property="og:url" content="https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" /><meta property="og:site_name" content="GriceBlog" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2021-05-12T01:00:00-04:00" /><meta name="twitter:card" content="summary" /><meta property="twitter:title" content="Django user account login by email (no usernames)" /><meta name="twitter:site" content="@JustTurrble" /><meta name="twitter:creator" content="@Galen Rice" /><meta name="google-site-verification" content="1PmOYNIfP8uB4OqtD6p8b6If0nI6dq8sgyfQdgENjeA" /> <script type="application/ld+json"> {"headline":"Django user account login by email (no usernames)","dateModified":"2021-05-12T01:00:00-04:00","description":"A common gripe with the Django framework is how it handles user accounts. Or, rather, how difficult it is to change from its default User model to something else.","datePublished":"2021-05-12T01:00:00-04:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://galenrice.com/posts/2021/05/12/django-email-user-accounts/"},"url":"https://galenrice.com/posts/2021/05/12/django-email-user-accounts/","author":{"@type":"Person","name":"Galen Rice"},"@context":"https://schema.org"}</script><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net" crossorigin="anonymous"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous"> <script src="https://kit.fontawesome.com/4f678b0cb8.js" crossorigin="anonymous"></script><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="/assets/js/lib/jquery-3.5.1.slim.min.js"></script><link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"> <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous" async></script> <script src="/assets/js/post.min.js" async></script> <script async src="https://www.googletagmanager.com/gtag/js?id="></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ''); </script> <script src="/app.js" defer></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/galenrice.png" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">GriceBlog</a></div><div class="site-subtitle font-italic">If it ain't broke, it's legacy.</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-sun" dark-mode-invisible></i> <i class="mode-toggle fas fa-moon" light-mode-invisible></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightkMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightkMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/GriceTurrble" target="_blank"> <i class="fab fa-github"></i> </a> <a href="https://twitter.com/JustTurrble" target="_blank"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:window.open('mailto:' + ['galen.rice','atumbomb.com'].join('@'))" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Django user account login by email (no usernames)</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>Django user account login by email (no usernames)</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Wed, May 12, 2021, 1:00 AM -0400" > May 12 <i class="unloaded">2021-05-12T01:00:00-04:00</i> </span> by <span class="author"> Galen Rice </span></div></div><div class="post-content"><p>A common gripe with the Django framework is how it handles user accounts. Or, rather, how difficult it is to change from its default <code class="language-plaintext highlighter-rouge">User</code> model to something else.</p><p>Django’s default system uses username-based logins, but a lot of developers are looking to use email-based logins, which have become commonplace across the web. Not only does this force a user to provide that email on signup (Django’s default auth system does not require the email field), it also simplifies the sign-up process itself (users may not be in the mood to pick a username for every site they visit).</p><p>So, if you’re looking to use Django but have email-based logins, this post is for you.</p><p>Unfortunately, the process is…</p><h2 id="more-complex-than-expected" data-toc-text="More complex than expected"> More complex than expected <a href="#more-complex-than-expected" class="anchor-heading">#</a></h2><p>Taking a look at <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/">Django’s docs on customizing user authentication</a>, one may quickly feel overwhelmed. Django’s documentation is one of the best resources around and should be the first place one looks for answers, but it is certainly not a step-by-step tutorial (though their <a href="https://docs.djangoproject.com/en/3.2/intro/tutorial01/">official tutorial</a> is still one of the best ways to get acquainted with the framework overall).</p><p>Could a tutorial like the one below be added to Django’s docs? Honestly, <em>probably not</em>. Authentication is a difficult topic in any web technology, and there is no “one size fits all” solution. What I present below is an opinion (<a href="https://duckduckgo.com/?q=django+user+auth+email">one of many (DuckDuckGo search)</a>).</p><p>I hope you’ll find this useful, offer suggestions for improvements if you disagree, or use this as a future reference for your other projects (speaking to future-me here).</p><h2 id="getting-started" data-toc-text="Getting started"> Getting started <a href="#getting-started" class="anchor-heading">#</a></h2><p>First up, we’ll of course need a Django project running. If you have one already, great! Skip ahead to <a href="#step-1-create-an-app-to-contain-your-authentication-system">Step 1</a>.</p><h3 id="step-0-setting-up-your-project" data-toc-text="Step 0: Setting up your project"> Step 0: Setting up your project <a href="#step-0-setting-up-your-project" class="anchor-heading">#</a></h3><p>To start a fresh Django project, as with any new Python project, you should first create and activate a new virtual environment, preferably with the <a href="https://www.python.org/">latest version of Python</a> available.</p><p>There are many options for dependency management out there. <a href="https://stackoverflow.com/a/41573588">This SO answer</a> does a great job comparing them all. Feel free to spend time exploring them (my personal preference is <a href="https://python-poetry.org/">poetry</a>, for what that’s worth).</p><p>For simplicity, we’ll use the built-in <code class="language-plaintext highlighter-rouge">venv</code> module:</p><ul><li><p>On Linux:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="c"># Make a new python venv:</span>
+<span class="nv">$ </span>python3 <span class="nt">-m</span> venv myvenv
+<span class="c"># and activate it:</span>
+<span class="nv">$ </span><span class="nb">source </span>myvenv/bin/activate
+</pre></table></code></div></div><li><p>On Windows (using PowerShell):</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="c"># Make a new python venv:</span>
+<span class="nv">$ </span>py <span class="nt">-m</span> venv myvenv
+<span class="c"># and activate it:</span>
+<span class="nv">$ </span>.<span class="se">\m</span>yvenv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+</pre></table></code></div></div></ul><p>Once the venv is activated, all commands are the same.</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c"># Update pip:</span>
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python <span class="nt">-m</span> pip <span class="nb">install</span> <span class="nt">--update</span> pip
+<span class="c"># Install latest Django:</span>
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>pip <span class="nb">install </span>Django
+<span class="c"># Use `django-admin` to start a new project:</span>
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>django-admin startproject myproject
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span><span class="nb">cd </span>myproject
+</pre></table></code></div></div><blockquote><p>Note that your prompt should start with <code class="language-plaintext highlighter-rouge">(myvenv)</code>, as shown above; indicating the virtual environment has been activated.</p></blockquote><p>Normally at this stage in a new Django project, you would run some other management commands to get things started, such as <code class="language-plaintext highlighter-rouge">migrate</code> and <code class="language-plaintext highlighter-rouge">createsuperuser</code>, but <strong>don’t run those yet!</strong> The changes we’ll be making below need to have migrations run <em>before</em> the migrations of some of Django’s built-in apps (see the note at the start of Step 1 for details).</p><h3 id="step-1-create-an-app-to-contain-your-authentication-system" data-toc-text="Step 1: Create an app to contain your authentication system"> Step 1: Create an app to contain your authentication system <a href="#step-1-create-an-app-to-contain-your-authentication-system" class="anchor-heading">#</a></h3><blockquote><p><strong>Note</strong>: If you’re making these changes in an existing project, see <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#changing-to-a-custom-user-model-mid-project">here</a> for details on how to set up a custom user model “mid-project”. What we’ll do below is best achieved <em>before</em> the migrations from other apps are executed.</p></blockquote><blockquote><p>The remedy for changing your User model “mid-project” involves re-ordering migrations and/or manually fixing the database schema, neither of which are particularly fun. Try your best to do all this <strong>first</strong> in your new project.</p></blockquote><p>Customizing the <code class="language-plaintext highlighter-rouge">User</code> model to use <code class="language-plaintext highlighter-rouge">email</code> for logins requires making a new model altogether, and that model must live inside some Django “app”. You can, of course, add the model to any app your already have, but I find it best to contain the model and its logic somewhere else, away from your site’s business logic.</p><p>What you name the new app is up to you. I prefer <code class="language-plaintext highlighter-rouge">accounts</code>:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="c"># Remember you activate your venv, and</span>
+<span class="c"># cd into the project to find the `manage.py` module!</span>
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python manage.py startapp accounts
+</pre></table></code></div></div><p>As with any new Django app, be sure to include it in <code class="language-plaintext highlighter-rouge">INSTALLED_APPS</code> in your <code class="language-plaintext highlighter-rouge">settings.py</code> module. Otherwise, Django won’t know the new model exists.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="c1"># mysite/settings.py
+</span>
+<span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">...</span>
+    <span class="s">"accounts"</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></table></code></div></div><h3 id="step-2-create-a-new-foouser-model" data-toc-text="Step 2: Create a new FooUser model"> Step 2: Create a new FooUser model <a href="#step-2-create-a-new-foouser-model" class="anchor-heading">#</a></h3><p>Now we’ll create a model to use in place of Django’s default <code class="language-plaintext highlighter-rouge">User</code>. We can call the new model <code class="language-plaintext highlighter-rouge">CustomUser</code> or <code class="language-plaintext highlighter-rouge">MyUser</code> or <code class="language-plaintext highlighter-rouge">SurprisinglyHandsomeUserPerson</code> or whatever else.</p><p>In my own projects, I just name it <code class="language-plaintext highlighter-rouge">User</code> for consistency. However, to prevent any confusion in this demonstration, we’ll call it <code class="language-plaintext highlighter-rouge">FooUser</code>.</p><p>Open up <code class="language-plaintext highlighter-rouge">accounts/models.py</code> and add the following:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">AbstractUser</span>
+
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></table></code></div></div><p>We will build upon this as we go.</p><p>For now, return to <code class="language-plaintext highlighter-rouge">settings.py</code> and add the setting for <code class="language-plaintext highlighter-rouge">AUTH_USER_MODEL</code> to point to our new model:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="c1"># mysite/settings.py
+</span>
+<span class="n">AUTH_USER_MODEL</span> <span class="o">=</span> <span class="s">"accounts.FooUser"</span>
+</pre></table></code></div></div><p>See <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#substituting-a-custom-user-model">here</a> for details on this setting.</p><h4 id="a-word-on-abstractuser-vs-abstractbaseuser" data-toc-text="A word on AbstractUser vs AbstractBaseUser"> A word on AbstractUser vs AbstractBaseUser <a href="#a-word-on-abstractuser-vs-abstractbaseuser" class="anchor-heading">#</a></h4><p>You’ll see I’m subclassing the new <code class="language-plaintext highlighter-rouge">FooUser</code> from <code class="language-plaintext highlighter-rouge">AbstractUser</code>, which is a fairly common solution. The other option is to use <code class="language-plaintext highlighter-rouge">AbstractBaseUser</code>.</p><p>Why should we use one vs the other? A brief detour into Django’s source code gives us a hint:</p><ul><li><a href="https://github.com/django/django/blob/7582d913e7db7f32e4cdcfafc177aa77cbbf4332/django/contrib/auth/base_user.py#L47"><code class="language-plaintext highlighter-rouge">AbstractBaseUser</code></a> provides the core machinery for authentication, namely password handling. Everything else, you have to provide yourself, including the username identifier, an email field, and so on. These <em>must</em> be implemented in order to have a working User model.<li><a href="https://github.com/django/django/blob/7582d913e7db7f32e4cdcfafc177aa77cbbf4332/django/contrib/auth/models.py#L321"><code class="language-plaintext highlighter-rouge">AbstractUser</code></a> builds on <code class="language-plaintext highlighter-rouge">AbstractBaseUser</code> to add those required fields and more, including username, email, <code class="language-plaintext highlighter-rouge">is_staff</code>, <code class="language-plaintext highlighter-rouge">is_active</code>, etc. It also subclasses from <a href="https://github.com/django/django/blob/7582d913e7db7f32e4cdcfafc177aa77cbbf4332/django/contrib/auth/models.py#L232"><code class="language-plaintext highlighter-rouge">PermissionsMixin</code></a>, adding <code class="language-plaintext highlighter-rouge">is_superuser</code> and connections to the Groups and Permissions models that are a key part of Django’s auth system.</ul><p>The built-in <code class="language-plaintext highlighter-rouge">User</code> model is little more than a subclass of <code class="language-plaintext highlighter-rouge">AbstractUser</code>. So, if what we want is Django’s <code class="language-plaintext highlighter-rouge">User</code> with tweaks, then <code class="language-plaintext highlighter-rouge">AbstractUser</code> is the way to go.</p><p>On the other hand, if you know precisely how you want authentication to be handled in your Django site, by all means start by subclassing <code class="language-plaintext highlighter-rouge">AbstractBaseUser</code> and start hacking away.</p><h3 id="step-3-adjust-the-foouser-model-to-our-needs" data-toc-text="Step 3: Adjust the FooUser model to our needs"> Step 3: Adjust the FooUser model to our needs <a href="#step-3-adjust-the-foouser-model-to-our-needs" class="anchor-heading">#</a></h3><p>Getting back on topic, we’ve got <code class="language-plaintext highlighter-rouge">FooUser</code>, but so far it’s just a shell that mimics the original <code class="language-plaintext highlighter-rouge">User</code> model. Now, let’s write some new logic to change things up.</p><ol><li><p>First up, the <code class="language-plaintext highlighter-rouge">email</code> field on the new model needs to be unique for the model, to prevent duplicate users. We can do this by redefining the <code class="language-plaintext highlighter-rouge">email</code> field like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="c1"># Add these imports:
+</span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">EmailField</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">(</span><span class="s">"Email address"</span><span class="p">),</span>
+        <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s">"unique"</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">"This email address is already in use."</span><span class="p">)</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</pre></table></code></div></div><p>Note the addition of <code class="language-plaintext highlighter-rouge">gettext_lazy</code>, which allows you to integrate <a href="https://docs.djangoproject.com/en/3.2/topics/i18n/translation/">translation features</a>. It’s a good idea to include these calls early in the project, creating the hooks for translating content without massive refactors later.</p><p>The key difference between our new <code class="language-plaintext highlighter-rouge">email</code> field and the old one is the addition of <code class="language-plaintext highlighter-rouge">unique=True</code>, ensuring no two users use the same email. The original version would also set <code class="language-plaintext highlighter-rouge">blank=True</code>, making the field optional in Django’s Admin and other forms; but we omit this to force it to be required.</p><p>As a bonus, we add a useful error message for when that uniqueness constraint is violated.</p><li><p>Next we need to tell Django to look at the <code class="language-plaintext highlighter-rouge">email</code> field as the username identifier for this model. We do this with <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD"><code class="language-plaintext highlighter-rouge">USERNAME_FIELD</code></a> and simply name the field we want as a string:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">USERNAME_FIELD</span> <span class="o">=</span> <span class="s">"email"</span>
+</pre></table></code></div></div><li><p><code class="language-plaintext highlighter-rouge">AbstractUser</code> also sets <code class="language-plaintext highlighter-rouge">email</code> as one of its <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.REQUIRED_FIELDS"><code class="language-plaintext highlighter-rouge">REQUIRED_FIELDS</code></a>, used when prompting for user details during the <code class="language-plaintext highlighter-rouge">createsuperuser</code> command. This would appear to make sense - we do require the email field - but it actually generates an error if left alone:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>(myvenv) $ python manage.py superuser
+...
+argparse.ArgumentError: argument --email: conflicting option string: --email
+</pre></table></code></div></div><p>The docs for <code class="language-plaintext highlighter-rouge">REQUIRED_FIELDS</code> actually state that it “should <em>not</em> contain the USERNAME_FIELD”, and it appears this is why. Therefore, we must remove it, by setting <code class="language-plaintext highlighter-rouge">REQUIRED_FIELDS</code> to an empty list:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></table></code></div></div><p>If you want to further customize the User model and add new fields, you can add those fields to this list later to have them prompted for when running <code class="language-plaintext highlighter-rouge">createsuperuser</code>.</p><li><p>Next, <code class="language-plaintext highlighter-rouge">AbstractUser</code> provides the <code class="language-plaintext highlighter-rouge">username</code> field definition, but we don’t want that anymore. Some folks will make this field optional and allow username entry in some capacity, but I prefer to remove it entirely.</p><p>Doing that is as simple as setting <code class="language-plaintext highlighter-rouge">username</code> to <code class="language-plaintext highlighter-rouge">None</code> at the class level, so no field gets defined at all:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="bp">None</span>
+</pre></table></code></div></div></ol><h2 id="the-completed-foouser-model" data-toc-text="The completed FooUser model"> The completed FooUser model <a href="#the-completed-foouser-model" class="anchor-heading">#</a></h2><p>So far so good! You should now have a full model that looks like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">AbstractUser</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="s">"""Our custom user model."""</span>
+
+    <span class="n">username</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">EmailField</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">(</span><span class="s">"Email address"</span><span class="p">),</span>
+        <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s">"unique"</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">"This email address is already in use."</span><span class="p">)</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">USERNAME_FIELD</span> <span class="o">=</span> <span class="s">'email'</span>
+    <span class="n">REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></table></code></div></div><h2 id="customizing-foousers-model-manager" data-toc-text="Customizing FooUser’s model manager"> Customizing FooUser’s model manager <a href="#customizing-foousers-model-manager" class="anchor-heading">#</a></h2><p>Before we start migrating this model and creating superusers, though, we’ll need to adjust the <a href="https://docs.djangoproject.com/en/3.2/topics/db/managers/">model manager</a> a bit.</p><p>If left as-is, the manager tied to <code class="language-plaintext highlighter-rouge">AbstractUser</code> will attempt to create users with the <code class="language-plaintext highlighter-rouge">username</code> field, which we no longer have. The same issue would occur in the Django Admin if we attempted to create the new user there, as well.</p><p>To remedy this, we’ll write a new model manager for <code class="language-plaintext highlighter-rouge">FooUser</code>. This is less daunting than it seems, despite the complexity of the code you’re about to see.</p><p>Simply create a new <code class="language-plaintext highlighter-rouge">managers.py</code> module in the <code class="language-plaintext highlighter-rouge">accounts/</code> directory, then add the following:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/managers.py
+</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">UserManager</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.hashers</span> <span class="kn">import</span> <span class="n">make_password</span>
+
+
+<span class="k">class</span> <span class="nc">FooUserManager</span><span class="p">(</span><span class="n">UserManager</span><span class="p">):</span>
+    <span class="s">"""Overrides to allow authentication by email, not username."""</span>
+
+    <span class="n">use_in_migrations</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">):</span>
+        <span class="n">extra_fields</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">"is_staff"</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">extra_fields</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">"is_superuser"</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">email</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nb">ValueError</span><span class="p">(</span><span class="s">"Email field is required"</span><span class="p">)</span>
+
+        <span class="n">email</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">normalize_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">)</span>
+        <span class="n">user</span><span class="p">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">make_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+        <span class="n">user</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">_db</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">user</span>
+
+    <span class="k">def</span> <span class="nf">create_superuser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">):</span>
+        <span class="n">extra_fields</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">"is_staff"</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">extra_fields</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">"is_superuser"</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">extra_fields</span><span class="p">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">"is_active"</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">create_user</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">)</span>
+</pre></table></code></div></div><p>Connect this manager to the <code class="language-plaintext highlighter-rouge">FooUser</code> model by adding it as the <code class="language-plaintext highlighter-rouge">objects</code> manager, like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="kn">from</span> <span class="nn">.managers</span> <span class="kn">import</span> <span class="n">FooUserManager</span>
+
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">FooUserManager</span><span class="p">()</span>
+</pre></table></code></div></div><p>Let’s break this down a bit (or you can <a href="#migrations-and-app-startup">skip to the next section</a> if you just want to get on with things 😊 ).</p><p>Django’s <code class="language-plaintext highlighter-rouge">UserManager</code> takes care of user creation in general. The <code class="language-plaintext highlighter-rouge">create_superuser()</code> method is called when you use the command <code class="language-plaintext highlighter-rouge">manage.py createsuperuser</code> to generate a superuser from the command line. The original method (as well as the other <code class="language-plaintext highlighter-rouge">create_user()</code> method) has a <code class="language-plaintext highlighter-rouge">username</code> positional argument; but since we no longer have a username, this would throw an error if left unchecked.</p><p>The above code is very similar to what Django uses for these methods (<a href="https://github.com/django/django/blob/7582d913e7db7f32e4cdcfafc177aa77cbbf4332/django/contrib/auth/models.py#L129-L189">see for yourself!</a>), so we can be confident we’re not missing any steps. The other available method, <code class="language-plaintext highlighter-rouge">with_perm</code>, is left completely alone, so we can re-use that in our app if we choose.</p><h2 id="migrations-and-app-startup" data-toc-text="Migrations and app startup"> Migrations and app startup <a href="#migrations-and-app-startup" class="anchor-heading">#</a></h2><p>With the above in place, we’re ready to complete the startup steps for your new Django site.</p><ol><li><p>First create the migration for the <code class="language-plaintext highlighter-rouge">FooUser</code> model, using the <code class="language-plaintext highlighter-rouge">makemigrations</code> command:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="c"># Remember to activate the venv first!</span>
+<span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python manage.py makemigrations
+Migrations <span class="k">for</span> <span class="s1">'accounts'</span>:
+  accounts/migrations/0001_initial.py
+    - Create model User
+</pre></table></code></div></div><li><p>Next, we can finally run all migrations to initialize the database for the first time, using the <code class="language-plaintext highlighter-rouge">migrate</code> command:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre><td class="rouge-code"><pre><span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python manage.py migrate
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, sessions
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying sessions.0001_initial... OK
+</pre></table></code></div></div><p>You can see from this output that our <code class="language-plaintext highlighter-rouge">accounts.0001_initial</code> migration ran <em>before</em> migrations for <code class="language-plaintext highlighter-rouge">admin</code> and <code class="language-plaintext highlighter-rouge">sessions</code>, both of which are core Django apps. This is why setting up the User model early in the project lifecycle was crucial.</p><li><p>Once <code class="language-plaintext highlighter-rouge">migrate</code> completes, you can run the <code class="language-plaintext highlighter-rouge">createsuperuser</code> command to make your first superuser account:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python manage.py createsuperuser
+Email address: myuser@example.com
+Password:
+Password <span class="o">(</span>again<span class="o">)</span>:
+Superuser created successfully.
+</pre></table></code></div></div><li><p>Finally, start up the development server using <code class="language-plaintext highlighter-rouge">runserver</code>:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="o">(</span>myvenv<span class="o">)</span> <span class="nv">$ </span>python manage.py runserver
+</pre></table></code></div></div></ol><p>You should now be able to visit <code class="language-plaintext highlighter-rouge">http://localhost:8000</code> to see the initial site, and <code class="language-plaintext highlighter-rouge">http://localhost:8000/admin</code> to login to Django Admin using your new superuser account.</p><h2 id="updating-the-admin-site" data-toc-text="Updating the Admin site"> Updating the Admin site <a href="#updating-the-admin-site" class="anchor-heading">#</a></h2><p>To get our <code class="language-plaintext highlighter-rouge">FooUser</code> model working in Django’s Admin site, we need to make a custom <code class="language-plaintext highlighter-rouge">ModelAdmin</code> class to register it.</p><p>The standard model uses <code class="language-plaintext highlighter-rouge">django.contrib.auth.admin.UserAdmin</code>, so we can just subclass this to take advantage of most of its machinery, adjusting only what we need.</p><p>For starters, let’s simply create the class and register it with our <code class="language-plaintext highlighter-rouge">FooUser</code> model:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/admin.py
+</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.admin</span> <span class="kn">import</span> <span class="n">UserAdmin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">FooUser</span>
+
+
+<span class="k">class</span> <span class="nc">FooUserAdmin</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="n">admin</span><span class="p">.</span><span class="n">site</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="n">FooUser</span><span class="p">,</span> <span class="n">FooUserAdmin</span><span class="p">)</span>
+</pre></table></code></div></div><p>If the server is running, you will probably see an error in your console at this point:</p><div class="language-shell highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre>ERRORS:
+&lt;class <span class="s1">'accounts.admin.FooUserAdmin'</span><span class="o">&gt;</span>: <span class="o">(</span>admin.E033<span class="o">)</span> The value of <span class="s1">'ordering[0]'</span> refers to <span class="s1">'username'</span>, which is not an attribute of <span class="s1">'accounts.FooUser'</span><span class="nb">.</span>
+</pre></table></code></div></div><p>So, there’s more to be adjusted before we can complete this.</p><ol><li><p>The old <code class="language-plaintext highlighter-rouge">username</code> field is referenced in <code class="language-plaintext highlighter-rouge">UserAdmin</code> under <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_display"><code class="language-plaintext highlighter-rouge">list_display</code></a>, <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.search_fields"><code class="language-plaintext highlighter-rouge">search_fields</code></a>, and <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.ordering"><code class="language-plaintext highlighter-rouge">ordering</code></a>. So, we copy over the contents of these settings, omitting <code class="language-plaintext highlighter-rouge">username</code> and focusing on our remaining fields:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/admin.py
+</span>
+<span class="k">class</span> <span class="nc">FooUserAdmin</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">,</span> <span class="s">"is_staff"</span><span class="p">)</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">)</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,)</span>  <span class="c1"># Don't forget that comma, or it won't be a tuple!
+</span></pre></table></code></div></div><p>In the case of <code class="language-plaintext highlighter-rouge">ordering</code> in particular, <code class="language-plaintext highlighter-rouge">username</code> was its only member before, so we’ll just add <code class="language-plaintext highlighter-rouge">email</code> there, instead.</p><li><p><a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets"><code class="language-plaintext highlighter-rouge">fieldsets</code></a> needs to be adjusted. The first section needs to focus on our required <code class="language-plaintext highlighter-rouge">email</code> field instead of <code class="language-plaintext highlighter-rouge">username</code>, and a subsequent <code class="language-plaintext highlighter-rouge">Personal Info</code> section needs to have <code class="language-plaintext highlighter-rouge">email</code> removed from it. The rest we’ll leave unchanged.</p><p>Those changes look like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/admin.py
+</span>
+<span class="c1"># Add this import:
+</span><span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="k">class</span> <span class="nc">FooUserAdmin</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"password"</span><span class="p">),</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">"Personal info"</span><span class="p">),</span> <span class="p">{</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">),</span>
+        <span class="p">}),</span>
+        <span class="o">*</span><span class="n">UserAdmin</span><span class="p">.</span><span class="n">fieldsets</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+    <span class="p">)</span>
+</pre></table></code></div></div><p>Note that last line, <code class="language-plaintext highlighter-rouge">*UserAdmin.fieldsets[2:]</code>. Since <code class="language-plaintext highlighter-rouge">UserAdmin</code> has defined <code class="language-plaintext highlighter-rouge">fieldsets</code> already, we can slice that tuple to retrieve the parts we aren’t changing (everything after the first two sections); then unpack that slice back into <code class="language-plaintext highlighter-rouge">FooUserAdmin.fieldsets</code> using the “splat” operator (<code class="language-plaintext highlighter-rouge">*</code>).</p><li><p>Finally, <code class="language-plaintext highlighter-rouge">UserAdmin</code> has a custom attribute similar to <code class="language-plaintext highlighter-rouge">fieldsets</code> called <code class="language-plaintext highlighter-rouge">add_fieldsets</code>. This is used in place of <code class="language-plaintext highlighter-rouge">fieldsets</code> when creating a new user (using some extra logic in the <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.get_fieldsets"><code class="language-plaintext highlighter-rouge">get_fieldsets</code></a> method). This is how the User Admin displays a simpler form with just <code class="language-plaintext highlighter-rouge">username</code> and two <code class="language-plaintext highlighter-rouge">password</code> fields, only providing all other entries when the User has already been created.</p><p>We adjust this to use our <code class="language-plaintext highlighter-rouge">email</code> field in place of <code class="language-plaintext highlighter-rouge">username</code>, like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/admin.py
+</span>
+<span class="k">class</span> <span class="nc">FooUserAdmin</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">):</span>
+    <span class="p">...</span>
+    <span class="n">add_fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">"classes"</span><span class="p">:</span> <span class="p">(</span><span class="s">"wide"</span><span class="p">,),</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"password1"</span><span class="p">,</span> <span class="s">"password2"</span><span class="p">),</span>
+        <span class="p">}),</span>
+    <span class="p">)</span>
+</pre></table></code></div></div></ol><p>With that, we should have a fully-functional Admin page for <code class="language-plaintext highlighter-rouge">FooUser</code>. The full code looks like so:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/admin.py
+</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.admin</span> <span class="kn">import</span> <span class="n">UserAdmin</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">FooUser</span>
+
+<span class="k">class</span> <span class="nc">FooUserAdmin</span><span class="p">(</span><span class="n">UserAdmin</span><span class="p">):</span>
+    <span class="s">"""Custom admin class for our FooUser model."""</span>
+
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">,</span> <span class="s">"is_staff"</span><span class="p">)</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">)</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,)</span>
+
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"password"</span><span class="p">),</span>
+        <span class="p">}),</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">"Personal info"</span><span class="p">),</span> <span class="p">{</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"first_name"</span><span class="p">,</span> <span class="s">"last_name"</span><span class="p">),</span>
+        <span class="p">}),</span>
+        <span class="o">*</span><span class="n">UserAdmin</span><span class="p">.</span><span class="n">fieldsets</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+    <span class="p">)</span>
+    <span class="n">add_fieldsets</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">"classes"</span><span class="p">:</span> <span class="p">(</span><span class="s">"wide"</span><span class="p">,),</span>
+            <span class="s">"fields"</span><span class="p">:</span> <span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="s">"password1"</span><span class="p">,</span> <span class="s">"password2"</span><span class="p">),</span>
+        <span class="p">}),</span>
+    <span class="p">)</span>
+
+
+<span class="n">admin</span><span class="p">.</span><span class="n">site</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="n">FooUser</span><span class="p">,</span> <span class="n">FooUserAdmin</span><span class="p">)</span>
+</pre></table></code></div></div><h2 id="using-your-new-model-in-other-apps" data-toc-text="Using your new model in other apps"> Using your new model in other apps <a href="#using-your-new-model-in-other-apps" class="anchor-heading">#</a></h2><p>A lot of times you’ll find example code that refers to the <em>original</em> User model from <code class="language-plaintext highlighter-rouge">django.contrib.auth.models</code> by importing it directly:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="c1"># DON'T DO THIS!
+</span><span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+</pre></table></code></div></div><p>Doing so negates the benefits of your custom model. Even using this import in a project that otherwise does not change the User model simply makes it more difficult for that project to change to a custom User model later, since you’ll need to locate and refactor every instance of this import as well as the code using it.</p><p>Django includes a standard way to access the current user model in any context, no matter which model - theirs, yours, <a href="https://django-allauth.readthedocs.io/en/latest/">allauth’s</a>, whomever’s - you choose to implement. This standard method is the <code class="language-plaintext highlighter-rouge">get_user_model</code> function:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="c1"># This is the way:
+</span><span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">get_user_model</span>
+
+<span class="n">User</span> <span class="o">=</span> <span class="n">get_user_model</span><span class="p">()</span>
+</pre></table></code></div></div><p>With our <code class="language-plaintext highlighter-rouge">FooUser</code> model implemented, <code class="language-plaintext highlighter-rouge">get_user_model()</code> will return the <code class="language-plaintext highlighter-rouge">FooUser</code> class, then assign that class to <code class="language-plaintext highlighter-rouge">User</code>. From there, you can use <code class="language-plaintext highlighter-rouge">User</code> like you would the standard Django User model: retrieving user instances, creating users, authenticating, deleting, and so on.</p><p>You can use this same reference as the target for a relational field, such as <code class="language-plaintext highlighter-rouge">models.ForeignKey</code>. However, it’s typically better to use <code class="language-plaintext highlighter-rouge">settings.AUTH_USER_MODEL</code>, instead:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">MyNewModel</span><span class="p">(</span><span class="n">models</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">my_user</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">settings</span><span class="p">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="p">.</span><span class="n">CASCADE</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></table></code></div></div><p>This is because <code class="language-plaintext highlighter-rouge">ForeignKey</code> and other relational fields can accept a string value for the target model, in the same format as <code class="language-plaintext highlighter-rouge">settings.AUTH_USER_MODEL</code>. This method is <a href="https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#referencing-the-user-model">recommended by Django docs</a>, as well.</p><h2 id="bonus-uuid-primary-keys-for-everyone" data-toc-text="Bonus: UUID primary keys for everyone!"> Bonus: UUID primary keys for everyone! <a href="#bonus-uuid-primary-keys-for-everyone" class="anchor-heading">#</a></h2><p>My personal preference is to use UUIDs as the primary key in most of my models in new projects, including the User model. If nothing else, it settles squabbles about who gets to be “#1” in the new application (instead, you’re <code class="language-plaintext highlighter-rouge">89b6504c-d0b6-4f34-adab-a4034413c5aa</code> and that’s final /s).</p><p>Implementing UUIDs in Django models is pretty straightforward. Simply use <a href="https://docs.djangoproject.com/en/3.2/ref/models/fields/#uuidfield"><code class="language-plaintext highlighter-rouge">UUIDField</code></a> and provide Python’s built-in <code class="language-plaintext highlighter-rouge">uuid.uuid4</code> function as a default:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">UUIDField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">uuid</span><span class="p">.</span><span class="n">uuid4</span><span class="p">,</span>
+        <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></table></code></div></div><p>You can take this a couple steps further by:</p><ol><li>assigning the field to the <code class="language-plaintext highlighter-rouge">id</code> attribute of the model (usually set to an AutoField) with <code class="language-plaintext highlighter-rouge">primary_key</code> set to <code class="language-plaintext highlighter-rouge">True</code>; and<li>applying this logic to an abstract model that you can use as a mixin anywhere in your project.</ol><p>My projects often use a <code class="language-plaintext highlighter-rouge">core</code> app that houses <code class="language-plaintext highlighter-rouge">settings.py</code> and <code class="language-plaintext highlighter-rouge">wsgi.py</code> and the like. This is where I would then place a new <code class="language-plaintext highlighter-rouge">models.py</code> module which <em>only</em> contains abstract models (since the “core” app is not a real Django app, it won’t be able to use non-abstract or “concrete” models, anyway).</p><p>Thus, the abstract model <code class="language-plaintext highlighter-rouge">UUIDPrimaryKeyModel</code>:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre><td class="rouge-code"><pre><span class="c1"># core/models.py
+</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">UUIDPrimaryKeyModel</span><span class="p">(</span><span class="n">models</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="s">"""Defines `id` as a UUIDField for the primary key."""</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">UUIDField</span><span class="p">(</span>
+        <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">uuid</span><span class="p">.</span><span class="n">uuid4</span><span class="p">,</span>
+        <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></table></code></div></div><p>You can then very easily add this to the <code class="language-plaintext highlighter-rouge">FooUser</code> model from earlier, simply by adding it as a subclass:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="c1"># accounts/models.py
+</span>
+<span class="kn">from</span> <span class="nn">core.models</span> <span class="kn">import</span> <span class="n">UUIDPrimaryKeyModel</span>
+
+<span class="p">...</span>
+
+<span class="k">class</span> <span class="nc">FooUser</span><span class="p">(</span><span class="n">UUIDPrimaryKeyModel</span><span class="p">,</span> <span class="n">AbstractUser</span><span class="p">):</span>
+    <span class="p">...</span>
+</pre></table></code></div></div><p>And presto, your custom User model is keyed by UUID values automatically, with no additional customization needed.</p><h2 id="wrapping-up" data-toc-text="Wrapping up"> Wrapping up <a href="#wrapping-up" class="anchor-heading">#</a></h2><p>In this article, we:</p><ul><li>Created a custom User model, <code class="language-plaintext highlighter-rouge">FooUser</code>, based on Django’s <code class="language-plaintext highlighter-rouge">AbstractUser</code>; removing the <code class="language-plaintext highlighter-rouge">username</code> field and adjusting the model to use <code class="language-plaintext highlighter-rouge">email</code> as the new username.<li>Created a custom model manager, <code class="language-plaintext highlighter-rouge">FooUserManager</code>, that correctly creates new users and superusers without referencing the old <code class="language-plaintext highlighter-rouge">username</code> field; and connected this manager to <code class="language-plaintext highlighter-rouge">FooUser</code>.<li>Registered <code class="language-plaintext highlighter-rouge">FooUser</code> with the Admin site by re-using much of the original <code class="language-plaintext highlighter-rouge">UserAdmin</code>, removing references to <code class="language-plaintext highlighter-rouge">username</code> and ensuring <code class="language-plaintext highlighter-rouge">email</code> was brought to the top.<li>Briefly went over how to properly use the new <code class="language-plaintext highlighter-rouge">FooUser</code> in other parts of a Django project.<li>As a bonus, set up <code class="language-plaintext highlighter-rouge">FooUser</code> to use a UUID primary key field by way of an abstract model.</ul><p>I hope you enjoyed reading this. Feel free to hit me up using the contact links in the side bar if you have questions or corrections to share!</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/code/'>Code</a>, <a href='/categories/django/'>Django</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/django/" class="post-tag no-text-decoration" >django</a> <a href="/tags/python/" class="post-tag no-text-decoration" >python</a> <a href="/tags/code/" class="post-tag no-text-decoration" >code</a> <a href="/tags/site-building/" class="post-tag no-text-decoration" >site building</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Django user account login by email (no usernames) - GriceBlog&url=https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Django user account login by email (no usernames) - GriceBlog&u=https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=Django user account login by email (no usernames) - GriceBlog&url=https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://galenrice.com/posts/2021/05/12/django-email-user-accounts/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank"> <i class="fa-fw fab fa-linkedin"></i> </a> <a href="https://www.reddit.com/submit?url=https://galenrice.com/posts/2021/05/12/django-email-user-accounts/&title=Django user account login by email (no usernames) - GriceBlog" data-toggle="tooltip" data-placement="top" title="Reddit" target="_blank"> <i class="fa-fw fab fa-reddit"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"><h3 data-toc-skip>Recent Update</h3><ul class="post-content pl-0 pb-1 ml-1 mt-2"></ul></div><div id="access-tags"><h3 data-toc-skip>Trending Tags</h3><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/site-building/">site building</a> <a class="post-tag" href="/tags/python/">python</a> <a class="post-tag" href="/tags/meta/">meta</a> <a class="post-tag" href="/tags/code/">code</a> <a class="post-tag" href="/tags/puzzles/">puzzles</a> <a class="post-tag" href="/tags/jupyter/">jupyter</a> <a class="post-tag" href="/tags/jekyll/">jekyll</a> <a class="post-tag" href="/tags/holidays/">holidays</a> <a class="post-tag" href="/tags/github-pages/">github pages</a> <a class="post-tag" href="/tags/github/">github</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"><h3 data-toc-skip class="pl-3 pt-2 mb-2">Contents</h3><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/2020/12/11/advent-of-code-2020/"><div class="card-body"> <span class="timeago small" > Dec 11, 2020 <i class="unloaded">2020-12-11T16:00:00-05:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Advent of Code 2020</h3><div class="text-muted small"><p> If you’re following along with this blog so far, I commend your dedication, as clearly I am not one to post here often. Like many others, I am participating in the ongoing Advent of Code (and for ...</p></div></div></a></div><div class="card"> <a href="/posts/2020/10/15/starting-this-site/"><div class="card-body"> <span class="timeago small" > Oct 15, 2020 <i class="unloaded">2020-10-15T12:00:00-04:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>How This Blog Was built</h3><div class="text-muted small"><p> If you’re wondering how I put this site together (or if you’re me from the future who totally forgot about it), then you’re in luck. I’m not a fan of long intros, so let’s just get started, shall ...</p></div></div></a></div><div class="card"> <a href="/posts/2020/10/14/hello-world/"><div class="card-body"> <span class="timeago small" > Oct 14, 2020 <i class="unloaded">2020-10-14T16:00:00-04:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Welcome!</h3><div class="text-muted small"><p> Hi, folks. Galen here, aka GriceTurrble (or G.Rice, or just G). Getting started here, not much content to add at the moment, but putting this out there so the site isn’t so “templatey”. Will proba...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/2020/12/11/advent-of-code-2020/" class="btn btn-outline-primary"><p>Advent of Code 2020</p></a> <span class="btn btn-outline-primary disabled"><p>-</p></span></div></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://github.com/griceturrble">Galen Rice</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/site-building/">site building</a> <a class="post-tag" href="/tags/python/">python</a> <a class="post-tag" href="/tags/meta/">meta</a> <a class="post-tag" href="/tags/code/">code</a> <a class="post-tag" href="/tags/puzzles/">puzzles</a> <a class="post-tag" href="/tags/jupyter/">jupyter</a> <a class="post-tag" href="/tags/jekyll/">jekyll</a> <a class="post-tag" href="/tags/holidays/">holidays</a> <a class="post-tag" href="/tags/github-pages/">github pages</a> <a class="post-tag" href="/tags/github/">github</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://galenrice.com{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script>
