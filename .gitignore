@@ -23,3 +23,6 @@ package-lock.json
 # I don't care about this being a fast bundler.
 # Just install as needed from the Gemfile, thank you.
 [Gg]emfile.lock
+
+# Local bundle installs
+_bundle
