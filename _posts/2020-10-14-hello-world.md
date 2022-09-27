@@ -1,6 +1,6 @@
 ---
 title: Welcome!
-author: Galen Rice
+author: galen_rice
 date: 2020-10-14 16:00:00 -0400
 tags: [meta]
 sitemap: false

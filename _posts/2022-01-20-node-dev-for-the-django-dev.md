@@ -1,6 +1,6 @@
 ---
 title: Node development for the Django dev
-author: Galen Rice
+author: galen_rice
 date: 2022-01-20 13:00:00 -0500
 tags: [django, python, node, javascript, tailwindcss, code, site building]
 ---

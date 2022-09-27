@@ -1,6 +1,6 @@
 ---
 title: Django user account login by email (no usernames)
-author: Galen Rice
+author: galen_rice
 date: 2021-05-12 01:00:00 -0400
 tags: [django, python, code, site building]
 ---
