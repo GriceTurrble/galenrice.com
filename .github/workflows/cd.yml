@@ -5,8 +5,6 @@ name: "Automatic build and deploy"
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
     paths-ignore:
       - .gitignore
       - README.md
@@ -52,6 +50,7 @@ jobs:
 
   deploy:
     name: "Deploy site"
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
