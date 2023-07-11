@@ -46,7 +46,7 @@ jobs:
         run: bundle exec htmlproofer --disable-external --allow_hash_href "${SITE_DIR}"
 
       - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
 
   deploy:
     name: "Deploy site"
