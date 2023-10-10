@@ -4,6 +4,12 @@
 
 *If it ain't broke, it's legacy.*
 
+## ⚠️ Archived
+
+No longer maintaining the site. May rebuild something some day, but for now I've lost interest.
+
+## Description
+
 A development-focused blog by Galen Rice, software engineer in NJ, USA, who may or may not know what [he/him] is talking about.
 
 Site is built with GitHub Pages using the [Chirpy] Jekyll theme (if you like it, go check it out and say thanks!).
